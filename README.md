@@ -1,5 +1,5 @@
 # 128H-Final
-Group 22:
+### Group 22 ###
 
 Members: Warren Li (warrenl2), Alan Yao (ay15), David Yates (djyates2), Armin Rafieyan (arafi4)
 
