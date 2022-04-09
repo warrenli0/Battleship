@@ -5,6 +5,12 @@ enum BattleShipSpaces {
     Empty,
 }
 
+enum GameState {
+    Preparation,
+    InProgress,
+    Complete,
+}
+
 enum ShipType {
     Destroyer, 
     Submarine,
@@ -14,7 +20,7 @@ enum ShipType {
 }
 
 struct Board {
-    BattleShipSpaces space,
-    bool p1_turn,
-    bool p2_turn,
+    space: BattleShipSpaces,
+    p1_turn: bool,
+    p2_turn: bool,
 }
