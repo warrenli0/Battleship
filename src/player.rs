@@ -1,28 +1,33 @@
+use crate::ship::Ship;
+use crate::lib::{
+    Space
+};
+
 pub struct Player {
     name: String,
     id: u32,
-    board: Vec<Vec<BattleShipSpaces>>,
+    board: Vec<Vec<Space>>,
     ships: Vec<Ship>,
 }
 
 impl Player {
-    pub fn new() {
+    pub fn new() -> Player {
         todo!();
     }
 
     pub fn get_name(&self) -> &String {
-        &name
+        &self.name
     }
 
     pub fn get_id(&self) -> u32 {
-        id
+        self.id
     }
 
-    pub fn get_board(&self) -> &Vec<Vec<BattleShipSpaces>> {
-        &board
+    pub fn get_board(&self) -> &Vec<Vec<Space>> {
+        &self.board
     }
 
     pub fn get_ships(&self) -> &Vec<Ship> {
-        ships
+        &self.ships
     }
 }

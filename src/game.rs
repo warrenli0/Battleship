@@ -1,18 +1,21 @@
-use crate::cs128h_fiffffnal;
+use crate::player::Player;
+use crate::lib::{
+    GameState
+};
 
 pub struct Game {
     game_state: GameState,
     players: [Player; 2],
     round: u16,
-    turn: Option<&Player>,
-    winner: Option<&Player>,
+    turn: Option<u8>,
+    winner: Option<u8>,
 }
 
 impl Game {
     pub fn new() -> Game {
         Game {
             game_state: GameState::Preparation,
-            players: (Player::new(), Player::new()),
+            players: [Player::new(), Player::new()],
             round: 0,
             turn: None,
             winner: None,
@@ -20,7 +23,7 @@ impl Game {
     }
 
     pub fn get_game_state(&self) -> GameState {
-        game_state
+        self.game_state
     }
 
     pub fn get_player(&self, id: u32) -> &Player {
@@ -28,18 +31,18 @@ impl Game {
     }
 
     pub fn get_round(&self) -> u16 {
-        round
+        self.round
     }
 
-    pub fn get_turn(&self) -> Option<&Player> {
-        turn
+    pub fn get_turn(&self) -> Option<u8> {
+        self.turn
     }
 
-    pub fn get_winner(&self) -> Option<&Player> {
-        winner
+    pub fn get_winner(&self) -> Option<u8> {
+        self.winner
     }
 
-    pub fn check_for_winner(&self) -> Option<&Player> {
+    pub fn check_for_winner(&self) -> Option<u8> {
         todo!();
     }
 
@@ -51,11 +54,11 @@ impl Game {
         todo!();
     }
 
-    pub fn place_ship(&mut self) -> Result<> {
+    pub fn place_ship(&mut self) -> Result<bool, bool> {
         todo!();
     }
 
-    pub fn shoot(&mut self) -> Result<> {
+    pub fn shoot(&mut self) -> Result<bool, bool> {
         todo!();
     }
 }

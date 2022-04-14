@@ -1,26 +1,23 @@
-enum BattleShipSpaces {
+#[derive(Clone, Copy)]
+pub enum GameState {
+    Preparation,
+    InProgress,
+    Complete,
+}
+
+#[derive(Clone, Copy)]
+pub enum Space {
     Hit,
     Missed,
     Occupied,
     Empty,
 }
 
-enum GameState {
-    Preparation,
-    InProgress,
-    Complete,
-}
-
-enum ShipType {
+#[derive(Clone, Copy)]
+pub enum ShipType {
     Destroyer, 
     Submarine,
-    Cruiser,
+    PatrolBoat,
     Battleship,
     Carrier,
-}
-
-struct Board {
-    space: BattleShipSpaces,
-    p1_turn: bool,
-    p2_turn: bool,
 }
