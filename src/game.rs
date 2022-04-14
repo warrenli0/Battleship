@@ -1,7 +1,7 @@
 use crate::player::Player;
-use crate::lib::{
-    GameState
-};
+use crate::player::ROWS;
+use crate::player::COLS;
+use crate::lib::{ GameState, Space };
 
 pub struct Game {
     game_state: GameState,
@@ -26,8 +26,8 @@ impl Game {
         self.game_state
     }
 
-    pub fn get_player(&self, id: u32) -> &Player {
-        todo!();
+    pub fn get_player(&self, player_num: u8) -> &Player {
+        &self.players[player_num as usize]
     }
 
     pub fn get_round(&self) -> u16 {
@@ -60,5 +60,52 @@ impl Game {
 
     pub fn shoot(&mut self) -> Result<bool, bool> {
         todo!();
+    }
+
+    pub fn print(&self) {
+        println!("========== GAME DETAILS ==========");
+        println!("\nThe board of Player 1:");
+        self.print_board(0);
+
+        println!("\nThe board of Player 2:");
+        self.print_board(1);
+
+        println!("\nGame State: {:?}", self.game_state);
+        println!("Round: {:?}", self.round);
+        
+        if self.turn.is_none() {
+            println!("Turn: None");
+        } else {
+            println!("Turn: {:?}", self.turn.unwrap());
+        }
+
+        if self.turn.is_none() {
+            println!("Winner: None");
+        } else {
+            println!("Winner: {:?}", self.winner.unwrap());
+        }
+    }
+
+    fn print_board(&self, player_num: u8) {
+        let player: &Player = self.get_player(player_num);
+        let board: &Vec<Vec<Space>> = player.get_board();
+
+        for row in 0..board.len() {
+            print!("{:2} ", row + 1);
+            for space in board.get(row).unwrap() {
+                if *space == Space::Empty {
+                    print!(" - ");
+                } else if *space == Space::Hit {
+                    print!(" H "); // 💥
+                } else if *space == Space::Missed {
+                    print!(" M "); // 💧
+                } else if *space == Space::Occupied {
+                    print!(" S ");
+                }
+            }
+            println!();
+        }
+
+        println!("    A  B  C  D  E  F  G  H  I  J");
     }
 }

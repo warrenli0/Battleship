@@ -1,26 +1,20 @@
 use crate::ship::Ship;
-use crate::lib::{
-    Space
-};
+use crate::lib::{ Space };
+
+pub const ROWS: usize = 10;
+pub const COLS: usize = 10;
 
 pub struct Player {
-    name: String,
-    id: u32,
     board: Vec<Vec<Space>>,
     ships: Vec<Ship>,
 }
 
 impl Player {
     pub fn new() -> Player {
-        todo!();
-    }
-
-    pub fn get_name(&self) -> &String {
-        &self.name
-    }
-
-    pub fn get_id(&self) -> u32 {
-        self.id
+        Player {
+            board: vec![vec![Space::Empty; COLS]; ROWS],
+            ships: Ship::get_ships_vec(),
+        }
     }
 
     pub fn get_board(&self) -> &Vec<Vec<Space>> {

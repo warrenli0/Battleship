@@ -3,6 +3,9 @@ mod player;
 mod ship;
 mod lib;
 
+use game::Game;
+
 fn main() {
-    println!("Hello, world!");
+    let game: Game = Game::new();
+    game.print();
 }
