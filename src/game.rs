@@ -1,9 +1,9 @@
 use crate::player::Player;
-use crate::player::ROWS;
-use crate::player::COLS;
+use crate::settings::Settings;
 use crate::lib::{ GameState, Space };
 
 pub struct Game {
+    settings: Settings,
     game_state: GameState,
     players: [Player; 2],
     round: u16,
@@ -12,10 +12,13 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Game {
+    pub fn new(settings: Settings) -> Game {
+        let num_rows: usize = settings.get_num_rows();
+        let num_cols: usize = settings.get_num_cols();
         Game {
+            settings,
             game_state: GameState::Preparation,
-            players: [Player::new(), Player::new()],
+            players: [Player::new(num_rows, num_cols), Player::new(num_rows, num_cols)],
             round: 0,
             turn: None,
             winner: None,
@@ -90,7 +93,7 @@ impl Game {
         let player: &Player = self.get_player(player_num);
         let board: &Vec<Vec<Space>> = player.get_board();
 
-        for row in 0..board.len() {
+        for row in 0..self.settings.get_num_rows() {
             print!("{:2} ", row + 1);
             for space in board.get(row).unwrap() {
                 if *space == Space::Empty {
@@ -106,6 +109,12 @@ impl Game {
             println!();
         }
 
-        println!("    A  B  C  D  E  F  G  H  I  J");
+        print!("   ");
+        let mut col_label: char = 'A';
+        for col in 0..self.settings.get_num_cols() {
+            print!(" {} ", col_label);
+            col_label = char::from_u32(col_label as u32 + 1).unwrap_or(col_label);
+        }
+        println!();
     }
 }

@@ -1,18 +1,15 @@
 use crate::ship::Ship;
 use crate::lib::{ Space };
 
-pub const ROWS: usize = 10;
-pub const COLS: usize = 10;
-
 pub struct Player {
     board: Vec<Vec<Space>>,
     ships: Vec<Ship>,
 }
 
 impl Player {
-    pub fn new() -> Player {
+    pub fn new(rows: usize, cols: usize) -> Player {
         Player {
-            board: vec![vec![Space::Empty; COLS]; ROWS],
+            board: vec![vec![Space::Empty; cols]; rows],
             ships: Ship::get_ships_vec(),
         }
     }
