@@ -1,13 +1,15 @@
-use crate::ship::{ShipPosition, ShipType};
+use crate::ship::{ShipPosition};
 
 pub struct Settings {
+    game_impl: GameImpl,
     num_rows: usize,
     num_cols: usize,
 }
 
 impl Settings {
-    pub fn new(num_rows: usize, num_cols: usize) -> Settings {
+    pub fn new(game_impl: GameImpl, num_rows: usize, num_cols: usize) -> Settings {
         Settings {
+            game_impl,
             num_rows,
             num_cols,
         }
@@ -33,4 +35,9 @@ impl Settings {
         }
         true
     }
+}
+
+pub enum GameImpl {
+    CommandLine,
+    // Graphics,
 }

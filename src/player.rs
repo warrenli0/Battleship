@@ -18,6 +18,17 @@ impl Player {
         &self.board
     }
 
+    pub fn empty_board(&self) -> bool {
+        for row in self.board.iter() {
+            for space in row.iter() {
+                if *space != Space::Empty {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
     pub fn get_ships(&self) -> &Vec<Ship> {
         &self.ships
     }

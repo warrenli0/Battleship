@@ -26,10 +26,6 @@ impl Game {
         }
     }
 
-    pub fn get_game_state(&self) -> GameState {
-        self.game_state
-    }
-
     fn get_player(&self, player_num: u8) -> &Player {
         &self.players[player_num as usize]
     }
@@ -38,31 +34,33 @@ impl Game {
         &mut self.players[player_num as usize]
     }
 
-    pub fn get_round(&self) -> u16 {
-        self.round
-    }
-
-    pub fn get_turn(&self) -> Option<u8> {
-        self.turn
-    }
-
-    pub fn get_winner(&self) -> Option<u8> {
-        self.winner
-    }
-
-    pub fn check_for_winner(&self) -> Option<u8> {
-        todo!();
-    }
-
     pub fn start_game(&mut self) {
-        todo!();
+        if self.has_started() {
+            println!("The game has already started!");
+            return;
+        }
+
+        while self.game_state == GameState::Preparation {
+            self.preparation_handler();
+        }
+
+        while self.game_state == GameState::InProgress {
+            self.in_progress_handler();
+        }
     }
 
-    pub fn end_game(&mut self) {
-        todo!();
+    fn has_started(&self) -> bool {
+        self.game_state == GameState::Preparation && self.players[0].empty_board() && self.players[1].empty_board()
+        && self.round == 0 && self.turn.is_none() && self.winner.is_none()
     }
 
-    pub fn place_ship(&mut self, player_num: u8, ship: &mut Ship, position: ShipPosition) -> Result<(), PlaceShipError> {
+    fn preparation_handler(&mut self) {
+        todo!();
+        // read input for ship placement
+        // when user types in 'ready', the game will move on if all ships were placed
+    }
+
+    fn place_ship(&mut self, player_num: u8, ship: &mut Ship, position: ShipPosition) -> Result<(), PlaceShipError> {
         match self.settings.is_in_bounds(ship.get_size(), position) {
             true => match self.game_state {
                 GameState::Preparation => self.get_player_mut(player_num).place_ship(ship, position),
@@ -72,7 +70,20 @@ impl Game {
         }
     }
 
-    pub fn shoot(&mut self) -> Result<bool, bool> {
+    fn in_progress_handler(&mut self) {
+        todo!();
+        // read input for hits
+    }
+
+    fn shoot(&mut self) -> Result<bool, bool> {
+        todo!();
+    }
+
+    fn check_for_winner(&self) -> Option<u8> {
+        todo!();
+    }
+
+    fn end_game(&mut self) {
         todo!();
     }
 
