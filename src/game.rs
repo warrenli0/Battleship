@@ -1,6 +1,7 @@
 use crate::player::Player;
 use crate::settings::Settings;
-use crate::lib::{ GameState, Space };
+use crate::ship::{Ship, ShipPosition};
+use crate::lib::{ GameState, PlaceShipError, Space };
 
 pub struct Game {
     settings: Settings,
@@ -29,8 +30,12 @@ impl Game {
         self.game_state
     }
 
-    pub fn get_player(&self, player_num: u8) -> &Player {
+    fn get_player(&self, player_num: u8) -> &Player {
         &self.players[player_num as usize]
+    }
+
+    fn get_player_mut(&mut self, player_num: u8) -> &mut Player {
+        &mut self.players[player_num as usize]
     }
 
     pub fn get_round(&self) -> u16 {
@@ -57,8 +62,14 @@ impl Game {
         todo!();
     }
 
-    pub fn place_ship(&mut self) -> Result<bool, bool> {
-        todo!();
+    pub fn place_ship(&mut self, player_num: u8, ship: &mut Ship, position: ShipPosition) -> Result<(), PlaceShipError> {
+        match self.settings.is_in_bounds(ship.get_size(), position) {
+            true => match self.game_state {
+                GameState::Preparation => self.get_player_mut(player_num).place_ship(ship, position),
+                _ => Err(PlaceShipError::InvalidGameState)
+            },
+            false => Err(PlaceShipError::OutOfBounds)
+        }
     }
 
     pub fn shoot(&mut self) -> Result<bool, bool> {

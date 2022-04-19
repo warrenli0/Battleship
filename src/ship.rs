@@ -1,13 +1,9 @@
-use core::num;
-
-use crate::lib::{ ShipType, Space };
-
 const NUM_SHIPS: usize = 5;
 
 pub struct Ship {
     ship_type: ShipType,
-    size: u8,
-    is_horizontal: bool,
+    position: Option<ShipPosition>,
+    health: u8,
 }
 
 impl Ship {
@@ -24,18 +20,8 @@ impl Ship {
     fn new(ship_type: ShipType) -> Ship {
         Ship {
             ship_type,
-            size: Ship::get_ship_size(ship_type),
-            is_horizontal: true,
-        }
-    }
-
-    fn get_ship_size(ship_type: ShipType) -> u8 {
-        match ship_type {
-            ShipType::Battleship => 4,
-            ShipType::Carrier => 5,
-            ShipType::Destroyer => 3,
-            ShipType::PatrolBoat => 1,
-            ShipType::Submarine => 2,
+            position: None,
+            health: ship_type.get_size(),
         }
     }
 
@@ -44,14 +30,38 @@ impl Ship {
     }
 
     pub fn get_size(&self) -> u8 {
-        self.size
+        self.ship_type.get_size()
     }
 
-    pub fn is_horizontal(&self) -> bool {
-        self.is_horizontal
+    pub fn change_position(&mut self, pos: ShipPosition) {
+        self.position = Some(pos);
     }
+}
 
-    pub fn change_rotation(&mut self) {
-        self.is_horizontal = !self.is_horizontal;
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ShipType {
+    Battleship,
+    Carrier,
+    Destroyer,
+    PatrolBoat,
+    Submarine,
+}
+
+impl ShipType {
+    fn get_size(&self) -> u8 {
+        match self {
+            Battleship => 4,
+            Carrier => 5,
+            Destroyer => 3,
+            PatrolBoat => 1,
+            Submarine => 2,
+        }
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ShipPosition {
+    pub row: usize,
+    pub col: usize,
+    pub is_horizontal: bool,
 }

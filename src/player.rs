@@ -1,5 +1,5 @@
-use crate::ship::Ship;
-use crate::lib::{ Space };
+use crate::ship::{ Ship, ShipType, ShipPosition };
+use crate::lib::{ PlaceShipError, Space };
 
 pub struct Player {
     board: Vec<Vec<Space>>,
@@ -20,5 +20,10 @@ impl Player {
 
     pub fn get_ships(&self) -> &Vec<Ship> {
         &self.ships
+    }
+
+    pub fn place_ship(&mut self, ship: &mut Ship, pos: ShipPosition) -> Result<(), PlaceShipError> {
+        ship.change_position(pos);
+        Ok(())
     }
 }

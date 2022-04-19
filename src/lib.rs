@@ -14,10 +14,7 @@ pub enum Space {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ShipType {
-    Battleship,
-    Carrier,
-    Destroyer,
-    PatrolBoat,
-    Submarine,
+pub enum PlaceShipError {
+    InvalidGameState,
+    OutOfBounds,
 }
