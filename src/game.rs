@@ -34,7 +34,7 @@ impl Game {
         &mut self.players[player_num as usize]
     }
 
-    pub fn start_game(&mut self) {
+    pub fn init(&mut self) {
         if self.has_started() {
             println!("The game has already started!");
             return;
@@ -50,8 +50,8 @@ impl Game {
     }
 
     fn has_started(&self) -> bool {
-        self.game_state == GameState::Preparation && self.players[0].empty_board() && self.players[1].empty_board()
-        && self.round == 0 && self.turn.is_none() && self.winner.is_none()
+        !(self.game_state == GameState::Preparation && self.players[0].empty_board() && self.players[1].empty_board()
+        && self.round == 0 && self.turn.is_none() && self.winner.is_none())
     }
 
     fn preparation_handler(&mut self) {
@@ -60,13 +60,10 @@ impl Game {
         // when user types in 'ready', the game will move on if all ships were placed
     }
 
-    fn place_ship(&mut self, player_num: u8, ship: &mut Ship, position: ShipPosition) -> Result<(), PlaceShipError> {
-        match self.settings.is_in_bounds(ship.get_size(), position) {
-            true => match self.game_state {
-                GameState::Preparation => self.get_player_mut(player_num).place_ship(ship, position),
-                _ => Err(PlaceShipError::InvalidGameState)
-            },
-            false => Err(PlaceShipError::OutOfBounds)
+    fn place_ship(&mut self, player_num: u8, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {
+        match self.game_state {
+            GameState::Preparation => self.get_player_mut(player_num).place_ship(ship_num, pos),
+            _ => Err(PlaceShipError::InvalidGameState)
         }
     }
 
@@ -83,7 +80,7 @@ impl Game {
         todo!();
     }
 
-    fn end_game(&mut self) {
+    fn end(&mut self) {
         todo!();
     }
 

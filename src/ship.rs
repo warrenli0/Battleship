@@ -65,3 +65,18 @@ pub struct ShipPosition {
     pub col: usize,
     pub is_horizontal: bool,
 }
+
+impl ShipPosition {
+    pub fn is_in_bounds(&self, num_rows: usize, num_cols: usize, ship_size: u8) -> bool {
+        if self.row >= num_rows || self.col >= num_cols {
+            return false;
+        }
+        if self.is_horizontal && self.col + ship_size as usize - 1 >= num_cols {
+            return false;
+        }
+        if !self.is_horizontal && self.row + ship_size as usize - 1 >= num_rows {
+            return false;
+        }
+        true
+    }
+}
