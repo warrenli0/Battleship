@@ -1,7 +1,9 @@
 use crate::player::Player;
 use crate::settings::Settings;
-use crate::ship::{Ship, ShipPosition};
+use crate::ship::{Ship, ShipPosition, self};
 use crate::lib::{ GameState, PlaceShipError, Space };
+
+use std::io::{self, Read};
 
 pub struct Game {
     settings: Settings,
@@ -40,6 +42,7 @@ impl Game {
             return;
         }
 
+        self.turn = Some(0);
         while self.game_state == GameState::Preparation {
             self.preparation_handler();
         }
@@ -55,9 +58,24 @@ impl Game {
     }
 
     fn preparation_handler(&mut self) {
-        todo!();
         // read input for ship placement
         // when user types in 'ready', the game will move on if all ships were placed
+        let player_num: u8 = self.turn.unwrap();
+        self.print_board(player_num);
+        
+        println!("Player {}", player_num);
+        print!("Your ships: ");
+        let ships = self.get_player(player_num).get_ships();
+        for idx in 0..ships.len() {
+            print!("{:?} ({}), ", ships.get(idx).unwrap().get_type(), idx);
+        }
+        println!("\nWhere would you like to place a ship? Format: <ship number>, <position>");
+
+        let mut buffer: String = String::new();
+        io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
+
+        // todo: validate input (tell user if invalid), create a ShipPosition obj with the valid input, call the place_ship function,
+            // then report to the user if the ship was successfully placed or not (based on what place_ship returns)
     }
 
     fn place_ship(&mut self, player_num: u8, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {
