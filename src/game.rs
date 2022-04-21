@@ -1,6 +1,6 @@
 use crate::player::Player;
 use crate::settings::Settings;
-use crate::ship::{Ship, ShipPosition, self};
+use crate::ship::{Ship, ShipPosition};
 use crate::lib::{ GameState, PlaceShipError, Space };
 
 use std::io::{self, Read};
@@ -58,24 +58,44 @@ impl Game {
     }
 
     fn preparation_handler(&mut self) {
-        // read input for ship placement
-        // when user types in 'ready', the game will move on if all ships were placed
         let player_num: u8 = self.turn.unwrap();
+        let player: &Player = self.get_player(player_num);
+
         self.print_board(player_num);
-        
         println!("Player {}", player_num);
         print!("Your ships: ");
-        let ships = self.get_player(player_num).get_ships();
-        for idx in 0..ships.len() {
-            print!("{:?} ({}), ", ships.get(idx).unwrap().get_type(), idx);
+        player.print_ships();
+        println!("\nWhere would you like to place a ship? Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>");
+
+        let pos_info: (usize, ShipPosition) = self.ship_pos_from_stdin(player.get_ships().len());
+        println!("ship_num: {}, row: {}, col: {}, is_horizontal: {}", pos_info.0, pos_info.1.row, pos_info.1.col, pos_info.1.is_horizontal);
+        let place_res = self.place_ship(player_num, pos_info.0, pos_info.1);
+        
+        // todo: then report to the user if the ship was successfully placed or not (based on what place_ship returns)
+    }
+
+    fn ship_pos_from_stdin(&self, num_ships: usize) -> (usize, ShipPosition) {
+        loop {
+            let mut buffer: String = String::new();
+            io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
+            let parts: Vec<&str> = buffer.as_str().split(',').collect();
+            if parts.len() == 3 {
+                let ship_num = (*parts.get(0).unwrap()).trim().parse::<usize>();
+                let pos_str = (*parts.get(1).unwrap()).trim();
+                let orientation = (*parts.get(2).unwrap()).trim().parse::<char>();
+
+                if ship_num.is_ok() && orientation.is_ok() {
+                    let ship_num: usize = ship_num.unwrap();
+                    let orientation: char = orientation.unwrap().to_ascii_lowercase();
+                    let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
+                    if ship_num >= 0 && ship_num < num_ships && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
+                        let (row, col) = parsed_pos.unwrap();
+                        break (ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'});
+                    }
+                }
+            }
+            println!("Invalid input. Example input: 2, 3B, H (place ship 2 at position 3B horizontally)");
         }
-        println!("\nWhere would you like to place a ship? Format: <ship number>, <position>");
-
-        let mut buffer: String = String::new();
-        io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
-
-        // todo: validate input (tell user if invalid), create a ShipPosition obj with the valid input, call the place_ship function,
-            // then report to the user if the ship was successfully placed or not (based on what place_ship returns)
     }
 
     fn place_ship(&mut self, player_num: u8, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {
