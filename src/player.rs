@@ -45,16 +45,20 @@ impl Player {
         }
 
         if pos.is_horizontal {
-            for row in pos.row..pos.row + ship_size as usize {
-                if *self.board.get(row).unwrap().get(pos.col).unwrap() != Space::Empty {
+            for col in pos.col..pos.col + ship_size as usize {
+                let mut space: &mut Space = self.board.get_mut(pos.row).unwrap().get_mut(col).unwrap();
+                if *space != Space::Empty {
                     return Err(PlaceShipError::AlreadyOccupied);
                 }
+                *space = Space::Occupied;
             }
         } else {
-            for col in pos.col..pos.col + ship_size as usize {
-                if *self.board.get(pos.row).unwrap().get(col).unwrap() != Space::Empty {
+            for row in pos.row..pos.row + ship_size as usize {
+                let mut space: &mut Space = self.board.get_mut(row).unwrap().get_mut(pos.col).unwrap();
+                if *space != Space::Empty {
                     return Err(PlaceShipError::AlreadyOccupied);
                 }
+                *space = Space::Occupied;
             }
         }
 
@@ -64,7 +68,7 @@ impl Player {
 
     pub fn print_ships(&self) {
         for idx in 0..self.ships.len() {
-            print!("{:?} ({})", self.ships.get(idx).unwrap().get_type(), idx);
+            print!("{:?} ({}), ", self.ships.get(idx).unwrap().get_type(), idx);
         }
     }
 }

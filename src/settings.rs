@@ -45,7 +45,7 @@ impl Settings {
             row += next_char.to_digit(10).unwrap() as usize;
         }
 
-        let col = last_char.to_ascii_uppercase() as usize;
+        let col: usize = last_char.to_ascii_uppercase() as usize;
         if row == 0 || row - 1 >= self.num_rows || col < 65 || col - 65 >= self.num_cols {
             return Err(());
         }

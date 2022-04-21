@@ -50,11 +50,11 @@ pub enum ShipType {
 impl ShipType {
     fn get_size(&self) -> u8 {
         match self {
-            Battleship => 4,
-            Carrier => 5,
-            Destroyer => 3,
-            PatrolBoat => 1,
-            Submarine => 2,
+            ShipType::Battleship => 4,
+            ShipType::Carrier => 5,
+            ShipType::Destroyer => 3,
+            ShipType::PatrolBoat => 2,
+            ShipType::Submarine => 3,
         }
     }
 }

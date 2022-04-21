@@ -59,22 +59,23 @@ impl Game {
 
     fn preparation_handler(&mut self) {
         let player_num: u8 = self.turn.unwrap();
-        let player: &Player = self.get_player(player_num);
 
-        self.print_board(player_num);
+        {self.print_board(player_num);}
         println!("Player {}", player_num);
         print!("Your ships: ");
-        player.print_ships();
+        self.get_player(player_num).print_ships();
         println!("\nWhere would you like to place a ship? Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>");
 
-        let pos_info: (usize, ShipPosition) = self.ship_pos_from_stdin(player.get_ships().len());
-        println!("ship_num: {}, row: {}, col: {}, is_horizontal: {}", pos_info.0, pos_info.1.row, pos_info.1.col, pos_info.1.is_horizontal);
-        let place_res = self.place_ship(player_num, pos_info.0, pos_info.1);
-        
-        // todo: then report to the user if the ship was successfully placed or not (based on what place_ship returns)
+        loop {
+            let pos_info: (usize, ShipPosition) = self.get_ship_pos_from_input(self.get_player(player_num).get_ships().len());
+            match self.place_ship(player_num, pos_info.0, pos_info.1) {
+                Ok(()) => break,
+                Err(error) => println!("Invalid input: {:?}", error)
+            };
+        };
     }
 
-    fn ship_pos_from_stdin(&self, num_ships: usize) -> (usize, ShipPosition) {
+    fn get_ship_pos_from_input(&self, num_ships: usize) -> (usize, ShipPosition) {
         loop {
             let mut buffer: String = String::new();
             io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
@@ -88,7 +89,7 @@ impl Game {
                     let ship_num: usize = ship_num.unwrap();
                     let orientation: char = orientation.unwrap().to_ascii_lowercase();
                     let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
-                    if ship_num >= 0 && ship_num < num_ships && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
+                    if ship_num < num_ships && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
                         let (row, col) = parsed_pos.unwrap();
                         break (ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'});
                     }
