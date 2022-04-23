@@ -22,6 +22,14 @@ impl Player {
         &self.ships
     }
 
+    pub fn get_pos(&self, row: usize, col: usize) -> Space {
+        return self.board[row][col];
+    }
+
+    pub fn set_pos(&mut self, row: usize, col: usize, space: Space) {
+        self.board[row][col] = space;
+    }
+
     pub fn empty_board(&self) -> bool {
         for row in self.board.iter() {
             for space in row.iter() {

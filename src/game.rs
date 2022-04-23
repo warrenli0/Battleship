@@ -111,8 +111,17 @@ impl Game {
         // read input for hits
     }
 
-    fn shoot(&mut self) -> Result<bool, bool> {
-        todo!();
+    fn shoot(&mut self, player_num: u8, row: usize, col: usize) -> Result<Space, PlaceShipError> {
+        let mut player: &mut Player = self.get_player_mut(player_num);
+        if row >= player.get_board().len() || row < 0 || col >= player.get_board()[0].len() || col < 0 {
+            return Err(PlaceShipError::OutOfBounds);
+        }
+        if player.get_pos(row,col) == Space::Occupied {
+            player.set_pos(row,col,Space::Hit);
+            return Ok(Space::Hit);
+        } else {
+            return Ok(Space::Missed);
+        }
     }
 
     fn check_for_winner(&self) -> Option<u8> {
@@ -120,7 +129,7 @@ impl Game {
     }
 
     fn end(&mut self) {
-        todo!();
+        self.game_state = GameState::Complete;
     }
 
     pub fn print(&self) {
