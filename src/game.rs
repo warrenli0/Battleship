@@ -60,22 +60,17 @@ impl Game {
     fn preparation_handler(&mut self) {
         let player_num: u8 = self.turn.unwrap();
 
-        {self.print_board(player_num);}
-        println!("Player {}", player_num);
+        print!("{esc}c", esc = 27 as char);
+        self.print_board(player_num);
+        println!("Player {}'s Turn", player_num);
         print!("Your ships: ");
         self.get_player(player_num).print_ships();
         println!("\nWhere would you like to place a ship? Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>");
 
-        loop {
-            let pos_info: (usize, ShipPosition) = self.get_ship_pos_from_input(self.get_player(player_num).get_ships().len());
-            match self.place_ship(player_num, pos_info.0, pos_info.1) {
-                Ok(()) => break,
-                Err(error) => println!("Invalid input: {:?}", error)
-            };
-        };
+        self.place_ship_from_input(player_num, self.get_player(player_num).get_ships().len());
     }
 
-    fn get_ship_pos_from_input(&self, num_ships: usize) -> (usize, ShipPosition) {
+    fn place_ship_from_input(&mut self, player_num: u8, num_ships: usize) {
         loop {
             let mut buffer: String = String::new();
             io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
@@ -91,12 +86,14 @@ impl Game {
                     let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
                     if ship_num < num_ships && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
                         let (row, col) = parsed_pos.unwrap();
-                        break (ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'});
+                        if self.place_ship(player_num, ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'}).is_ok() {
+                            break;
+                        }
                     }
                 }
             }
             println!("Invalid input. Example input: 2, 3B, H (place ship 2 at position 3B horizontally)");
-        }
+        };
     }
 
     fn place_ship(&mut self, player_num: u8, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {

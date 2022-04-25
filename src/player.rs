@@ -76,7 +76,8 @@ impl Player {
 
     pub fn print_ships(&self) {
         for idx in 0..self.ships.len() {
-            print!("{:?} ({}), ", self.ships.get(idx).unwrap().get_type(), idx);
+            let ship: &Ship = self.ships.get(idx).unwrap();
+            print!("[{}] {:?}{}, ", idx, ship.get_type(), if ship.get_pos().is_some() {" (Placed)"} else {""});
         }
     }
 }

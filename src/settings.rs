@@ -1,6 +1,6 @@
 use crate::ship::{ShipPosition};
 
-const MAX_NUM_ROWS: usize = 26;  // max number of rows is 26 because we use an alphanumeric positioning system (with only 1 letter)
+const MAX_NUM_ROWS: usize = 26;  // max number of rows is 26 because we use an alphanumeric positioning system, where the row is represented as a single letter
 pub struct Settings {
     game_impl: GameImpl,
     num_rows: usize,

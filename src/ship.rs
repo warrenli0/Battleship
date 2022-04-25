@@ -33,6 +33,10 @@ impl Ship {
         self.ship_type.get_size()
     }
 
+    pub fn get_pos(&self) -> Option<ShipPosition> {
+        self.position
+    }
+
     pub fn change_position(&mut self, pos: ShipPosition) {
         self.position = Some(pos);
     }
