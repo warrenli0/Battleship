@@ -3,7 +3,7 @@ mod player;
 mod ship;
 mod lib;
 mod settings;
-// mod space;
+mod space;
 
 use game::Game;
 use settings::{Settings, GameImpl};
