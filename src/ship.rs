@@ -7,7 +7,7 @@ pub struct Ship {
 }
 
 impl Ship {
-    pub fn get_ships_vec() -> Vec<Ship> {
+    pub fn new_ships_vec() -> Vec<Ship> {
         let mut ships: Vec<Ship> = Vec::with_capacity(NUM_SHIPS);
         ships.push(Ship::new(ShipType::Battleship));  // hard-coded for all ship types, for now
         ships.push(Ship::new(ShipType::Carrier));
@@ -71,14 +71,17 @@ pub struct ShipPosition {
 }
 
 impl ShipPosition {
-    pub fn is_in_bounds(&self, num_rows: usize, num_cols: usize, ship_size: u8) -> bool {
+    pub fn is_in_bounds(&self, num_rows: usize, num_cols: usize, ship_size: usize) -> bool {
+        if ship_size == 0 {
+            return true;
+        }
         if self.row >= num_rows || self.col >= num_cols {
             return false;
         }
-        if self.is_horizontal && self.col + ship_size as usize - 1 >= num_cols {
+        if self.is_horizontal && self.col + ship_size - 1 >= num_cols {
             return false;
         }
-        if !self.is_horizontal && self.row + ship_size as usize - 1 >= num_rows {
+        if !self.is_horizontal && self.row + ship_size - 1 >= num_rows {
             return false;
         }
         true

@@ -1,7 +1,7 @@
 #[derive(Clone)]
 pub struct Space {
     hit_or_missed: bool,
-    occupant: Option<usize>,
+    occupant: Option<usize>,  // ship_num
 }
 
 impl Space {

@@ -6,17 +6,9 @@ pub enum GameState {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Space {
-    Hit,
-    Missed,
-    Occupied,
-    Empty,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PlaceShipError {
     InvalidGameState,
-    InvalidShip,
+    InvalidShipNum,
     AlreadyOccupied,
     OutOfBounds,
 }

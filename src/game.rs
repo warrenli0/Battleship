@@ -1,7 +1,8 @@
 use crate::player::Player;
 use crate::settings::Settings;
-use crate::ship::{Ship, ShipPosition};
-use crate::lib::{ GameState, PlaceShipError, Space };
+use crate::ship::{ShipPosition};
+use crate::space::{Space};
+use crate::lib::{ GameState, PlaceShipError };
 
 use std::io::{self, Read};
 
@@ -108,16 +109,16 @@ impl Game {
         // read input for hits
     }
 
-    fn shoot(&mut self, player_num: u8, row: usize, col: usize) -> Result<Space, PlaceShipError> {
+    fn shoot(&mut self, player_num: u8, row: usize, col: usize) -> Result<bool, PlaceShipError> {
         let mut player: &mut Player = self.get_player_mut(player_num);
         if row >= player.get_board().len() || row < 0 || col >= player.get_board()[0].len() || col < 0 {
             return Err(PlaceShipError::OutOfBounds);
         }
-        if player.get_pos(row,col) == Space::Occupied {
-            player.set_pos(row,col,Space::Hit);
-            return Ok(Space::Hit);
+        player.get_space_mut(row,col).shoot();
+        if player.get_space(row,col).is_occupied() {
+            return Ok(true);
         } else {
-            return Ok(Space::Missed);
+            return Ok(false);
         }
     }
 
@@ -160,15 +161,16 @@ impl Game {
         for row in 0..self.settings.get_num_rows() {
             print!("{:2} ", row + 1);
             for space in board.get(row).unwrap() {
-                if *space == Space::Empty {
-                    print!(" - ");
-                } else if *space == Space::Hit {
-                    print!(" H "); // 💥
-                } else if *space == Space::Missed {
-                    print!(" M "); // 💧
-                } else if *space == Space::Occupied {
-                    print!(" S ");
-                }
+                match space.get_occupant() {
+                    Some(ship_num) => match space.was_targeted() {
+                        true => print!(" X "),  // 💥
+                        false => print!(" {} ", ship_num)
+                    },
+                    None => match space.was_targeted() {
+                        true => print!(" ~ "),  // 💧
+                        false => print!(" - ")
+                    }
+                };
             }
             println!();
         }
