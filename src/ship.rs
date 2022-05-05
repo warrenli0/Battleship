@@ -40,6 +40,10 @@ impl Ship {
     pub fn change_position(&mut self, pos: ShipPosition) {
         self.position = Some(pos);
     }
+
+    pub fn is_placed(&self) -> bool {
+        self.position.is_some()
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -52,7 +56,7 @@ pub enum ShipType {
 }
 
 impl ShipType {
-    fn get_size(&self) -> u8 {
+    pub fn get_size(&self) -> u8 {
         match self {
             ShipType::Battleship => 4,
             ShipType::Carrier => 5,

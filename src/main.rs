@@ -4,6 +4,7 @@ mod ship;
 mod lib;
 mod settings;
 mod space;
+mod utils;
 
 use game::Game;
 use settings::{Settings, GameImpl};

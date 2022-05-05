@@ -3,16 +3,15 @@ use crate::settings::Settings;
 use crate::ship::{ShipPosition};
 use crate::space::{Space};
 use crate::lib::{ GameState, PlaceShipError };
-
-use std::io::{self, Read};
+use crate::utils;
 
 pub struct Game {
     settings: Settings,
     game_state: GameState,
     players: [Player; 2],
     round: u16,
-    turn: Option<u8>,
-    winner: Option<u8>,
+    turn: Option<usize>,
+    winner: Option<usize>,
 }
 
 impl Game {
@@ -29,12 +28,22 @@ impl Game {
         }
     }
 
-    fn get_player(&self, player_num: u8) -> &Player {
-        &self.players[player_num as usize]
+    fn get_player(&self, player_num: usize) -> &Player {
+        &self.players[player_num]
     }
 
-    fn get_player_mut(&mut self, player_num: u8) -> &mut Player {
-        &mut self.players[player_num as usize]
+    fn get_player_mut(&mut self, player_num: usize) -> &mut Player {
+        &mut self.players[player_num]
+    }
+    
+    fn switch_turn(&mut self) {
+        if self.turn.is_some() {
+            if self.turn.unwrap() == 0 {
+                self.turn = Some(1);
+            } else {
+                self.turn = Some(0);
+            }
+        }
     }
 
     pub fn init(&mut self) {
@@ -59,45 +68,74 @@ impl Game {
     }
 
     fn preparation_handler(&mut self) {
-        let player_num: u8 = self.turn.unwrap();
+        let player_num: usize = self.turn.unwrap();
 
-        print!("{esc}c", esc = 27 as char);
+        print!("{esc}c", esc = 27 as char);  // clears console
         self.print_board(player_num);
-        println!("Player {}'s Turn", player_num);
+        println!("Player {}'s Turn", player_num + 1);
         print!("Your ships: ");
         self.get_player(player_num).print_ships();
+        if self.get_player(player_num).all_ships_placed() {
+            print!("\nAll of your ships are placed. Type 'ready' if you are done placing ships.");
+        }
         println!("\nWhere would you like to place a ship? Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>");
-
-        self.place_ship_from_input(player_num, self.get_player(player_num).get_ships().len());
+        self.preparation_input_handler();
     }
 
-    fn place_ship_from_input(&mut self, player_num: u8, num_ships: usize) {
+    fn preparation_input_handler(&mut self) {;
+        let player_num: usize = self.turn.unwrap();
         loop {
-            let mut buffer: String = String::new();
-            io::stdin().read_line(&mut buffer).expect("Unable to read from standard input; try again");
-            let parts: Vec<&str> = buffer.as_str().split(',').collect();
-            if parts.len() == 3 {
-                let ship_num = (*parts.get(0).unwrap()).trim().parse::<usize>();
-                let pos_str = (*parts.get(1).unwrap()).trim();
-                let orientation = (*parts.get(2).unwrap()).trim().parse::<char>();
-
-                if ship_num.is_ok() && orientation.is_ok() {
-                    let ship_num: usize = ship_num.unwrap();
-                    let orientation: char = orientation.unwrap().to_ascii_lowercase();
-                    let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
-                    if ship_num < num_ships && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
-                        let (row, col) = parsed_pos.unwrap();
-                        if self.place_ship(player_num, ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'}).is_ok() {
-                            break;
-                        }
+            let input: String = utils::read_input();
+            let parsed_input = self.parse_preparation_input(input);
+            if parsed_input.is_ok() {
+                let parsed_input = parsed_input.unwrap();
+                if parsed_input.is_some() {  // if player wants to place a ship
+                    let ship_num: usize = parsed_input.unwrap().0;
+                    let ship_pos: ShipPosition = parsed_input.unwrap().1;
+                    if (self.place_ship(player_num, ship_num, ship_pos).is_ok()) {
+                        break;
                     }
+                } else if parsed_input.is_none() && self.get_player(player_num).all_ships_placed() {  // if user is done placing ships
+                    if player_num == self.players.len() - 1 {
+                        self.game_state = GameState::InProgress;
+                    }
+                    self.switch_turn();
+                    break;
                 }
-            }
+            };
             println!("Invalid input. Example input: 2, 3B, H (place ship 2 at position 3B horizontally)");
         };
     }
 
-    fn place_ship(&mut self, player_num: u8, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {
+    // returns: None if player is done placing ships; Some if player inputs any valid board position
+    fn parse_preparation_input(&self, input: String) -> Result<Option<(usize, ShipPosition)>, ()> {
+        if input.trim().to_ascii_lowercase() == "ready" {
+            return Ok(None);
+        }
+        
+        // Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>
+        let parts: Vec<&str> = input.as_str().split(',').collect();
+        if parts.len() != 3 {
+            return Err(());
+        }
+
+        let ship_num = (*parts.get(0).unwrap()).trim().parse::<usize>();
+        let pos_str = (*parts.get(1).unwrap()).trim();
+        let orientation = (*parts.get(2).unwrap()).trim().parse::<char>();
+
+        if ship_num.is_ok() && orientation.is_ok() {
+            let ship_num: usize = ship_num.unwrap();
+            let orientation: char = orientation.unwrap().to_ascii_lowercase();
+            let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
+            if ship_num < self.settings.get_num_ships() && parsed_pos.is_ok() && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
+                let (row, col) = parsed_pos.unwrap();
+                return Ok(Some((ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'})));
+            }
+        }
+        Err(())
+    }
+
+    fn place_ship(&mut self, player_num: usize, ship_num: usize, pos: ShipPosition) -> Result<(), PlaceShipError> {
         match self.game_state {
             GameState::Preparation => self.get_player_mut(player_num).place_ship(ship_num, pos),
             _ => Err(PlaceShipError::InvalidGameState)
@@ -109,7 +147,7 @@ impl Game {
         // read input for hits
     }
 
-    fn shoot(&mut self, player_num: u8, row: usize, col: usize) -> Result<bool, PlaceShipError> {
+    fn shoot(&mut self, player_num: usize, row: usize, col: usize) -> Result<bool, PlaceShipError> {
         let mut player: &mut Player = self.get_player_mut(player_num);
         if row >= player.get_board().len() || row < 0 || col >= player.get_board()[0].len() || col < 0 {
             return Err(PlaceShipError::OutOfBounds);
@@ -122,7 +160,7 @@ impl Game {
         }
     }
 
-    fn check_for_winner(&self) -> Option<u8> {
+    fn check_for_winner(&self) -> Option<usize> {
         todo!();
     }
 
@@ -154,7 +192,7 @@ impl Game {
         }
     }
 
-    fn print_board(&self, player_num: u8) {
+    fn print_board(&self, player_num: usize) {
         let player: &Player = self.get_player(player_num);
         let board: &Vec<Vec<Space>> = player.get_board();
 

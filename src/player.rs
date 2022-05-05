@@ -31,6 +31,15 @@ impl Player {
         &mut self.board[row][col]
     }
 
+    pub fn all_ships_placed(&self) -> bool {
+        for ship in self.ships.iter() {
+            if !ship.is_placed() {
+                return false;
+            }
+        }
+        true
+    }
+
     pub fn empty_board(&self) -> bool {
         for row in self.board.iter() {
             for space in row.iter() {
@@ -99,7 +108,10 @@ impl Player {
     pub fn print_ships(&self) {
         for idx in 0..self.ships.len() {
             let ship: &Ship = self.ships.get(idx).unwrap();
-            print!("[{}] {:?}{}, ", idx, ship.get_type(), if ship.get_pos().is_some() {" (Placed)"} else {""});
+            print!("[{}] {:?} (Size {})", idx, ship.get_type(), ship.get_type().get_size());
+            if idx != self.ships.len() - 1 {
+                print!(", ");
+            }
         }
     }
 }
