@@ -1,4 +1,4 @@
-use crate::player::Player;
+use crate::player::{Player, PlayerNumber};
 use crate::settings::Settings;
 use crate::ship::{ShipPosition};
 use crate::space::{Space};
@@ -148,7 +148,7 @@ impl Game {
     }
 
     fn shoot(&mut self, player_num: usize, row: usize, col: usize) -> Result<bool, PlaceShipError> {
-        let mut player: &mut Player = self.get_player_mut(player_num);
+        let player: &mut Player = self.get_player_mut(player_num);
         if row >= player.get_board().len() || row < 0 || col >= player.get_board()[0].len() || col < 0 {
             return Err(PlaceShipError::OutOfBounds);
         }
@@ -160,8 +160,43 @@ impl Game {
         }
     }
 
-    fn check_for_winner(&self) -> Option<usize> {
-        todo!();
+    fn get_winner(&self) -> Option<PlayerNumber> {
+        let p1_loss = self.players[0].loses();
+        let p2_loss = self.players[1].loses();
+        if p2_loss {
+            return Some(PlayerNumber::One);
+        }
+        if p1_loss {
+            return Some(PlayerNumber::Two);
+        }
+        return None;
+    }
+
+    fn player_loses(&self, player_number: usize) -> bool {
+        let player = &self.players[player_number];
+        let ships = player.get_ships();
+        for ship in ships {
+            let ship_position = match ship.get_pos() {
+                Some(position) => position,
+                None => {
+                    return false;
+                }
+            };
+            let mut current_row = ship_position.row;
+            let mut current_column = ship_position.col;
+            for _i in 0..ship.get_size() {
+                let space = player.get_space(current_row, current_column);
+                if !space.was_targeted() {
+                    return false;
+                }
+                if ship_position.is_horizontal {
+                    current_row += 1;
+                } else {
+                    current_column += 1;
+                }
+            }
+        }
+        return true;
     }
 
     fn end(&mut self) {

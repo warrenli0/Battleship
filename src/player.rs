@@ -2,6 +2,13 @@ use crate::ship::{ Ship, ShipType, ShipPosition };
 use crate::space::{Space};
 use crate::lib::{ PlaceShipError };
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PlayerNumber {
+    One,
+    Two,
+    Computer
+}
+
 pub struct Player {
     board: Vec<Vec<Space>>,
     ships: Vec<Ship>,
@@ -113,5 +120,31 @@ impl Player {
                 print!(", ");
             }
         }
+    }
+
+    pub fn loses(&self) -> bool {
+        // let ships = player.get_ships();
+        for ship in &self.ships {
+            let ship_position = match ship.get_pos() {
+                Some(position) => position,
+                None => {
+                    return false;
+                }
+            };
+            let mut current_row = ship_position.row;
+            let mut current_column = ship_position.col;
+            for _i in 0..ship.get_size() {
+                let space = self.get_space(current_row, current_column);
+                if !space.was_targeted() {
+                    return false;
+                }
+                if ship_position.is_horizontal {
+                    current_row += 1;
+                } else {
+                    current_column += 1;
+                }
+            }
+        }
+        return true;
     }
 }
