@@ -62,6 +62,9 @@ impl Game {
         while self.game_state == GameState::Attack {
             self.attack_handler();
         }
+
+        print!("{esc}c", esc = 27 as char);  // clears console
+        self.print();
     }
 
     fn has_started(&self) -> bool {
@@ -155,6 +158,11 @@ impl Game {
         println!("Player {}'s Turn", player_num + 1);
         println!("Where would you like to shoot? Format: <position>");
         self.attack_input_handler();
+
+        let winner: Option<PlayerNumber> = self.get_winner();
+        if winner.is_some() {
+            self.end(if winner.unwrap() == PlayerNumber::One { 0 } else { 1 });
+        }
     }
 
     fn attack_input_handler(&mut self) {
@@ -173,6 +181,7 @@ impl Game {
                 if !shoot_result.unwrap() {
                     println!("Your shot missed! Switching turns in 3 seconds...");
                     self.switch_turn();
+                    self.round += 1;
                     thread::sleep(time::Duration::from_secs(3));
                 }
                 break;
@@ -207,8 +216,10 @@ impl Game {
         return None;
     }
 
-    fn end(&mut self) {
+    fn end(&mut self, winner_player_num: usize) {
         self.game_state = GameState::Complete;
+        self.turn = None;
+        self.winner = Some(winner_player_num);
     }
 
     pub fn print(&self) {
@@ -219,19 +230,10 @@ impl Game {
         println!("\nThe board of Player 2:");
         self.print_board(1, false);
 
-        println!("\nGame State: {:?}", self.game_state);
-        println!("Round: {:?}", self.round);
-        
-        if self.turn.is_none() {
-            println!("Turn: None");
-        } else {
-            println!("Turn: {:?}", self.turn.unwrap());
-        }
+        println!("\nRounds: {:?}", self.round);
 
-        if self.turn.is_none() {
-            println!("Winner: None");
-        } else {
-            println!("Winner: {:?}", self.winner.unwrap());
+        if self.winner.is_some() {
+            println!("Winner: Player {:?}", self.winner.unwrap() + 1);
         }
     }
 
