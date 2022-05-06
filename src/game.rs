@@ -195,7 +195,7 @@ impl Game {
         self.get_player_mut(if player_num == 0 { 1 } else { 0 }).shoot(row, col)
     }
 
-    fn check_for_winner(&self) -> Option<PlayerNumber> {
+    fn get_winner(&self) -> Option<PlayerNumber> {
         let p1_loss = self.players[0].loses();
         let p2_loss = self.players[1].loses();
         if p2_loss {
