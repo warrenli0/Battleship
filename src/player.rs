@@ -1,6 +1,6 @@
 use crate::ship::{ Ship, ShipType, ShipPosition };
 use crate::space::{Space};
-use crate::lib::{ PlaceShipError };
+use crate::lib::{ PlaceShipError, ShootError };
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PlayerNumber {
@@ -120,6 +120,25 @@ impl Player {
                 print!(", ");
             }
         }
+    }
+
+    // If targeted space is valid and was not previously targeted, returns true if a ship was hit and false if miss
+    pub fn shoot(&mut self, row: usize, col: usize) -> Result<bool, ShootError> {
+        if row >= self.board.len() || col >= self.board[0].len() {
+            return Err(ShootError::OutOfBounds);
+        }
+
+        let space: &mut Space = &mut self.board[row][col];
+        if space.was_targeted() {
+            return Err(ShootError::AlreadyTargeted);
+        }
+        space.shoot();
+
+        if space.is_occupied() {
+            self.ships.get_mut(space.get_occupant().unwrap()).unwrap().health -= 1;
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     pub fn loses(&self) -> bool {
