@@ -1,7 +1,7 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GameState {
     Preparation,
-    InProgress,
+    Attack,
     Complete,
 }
 

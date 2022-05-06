@@ -59,8 +59,8 @@ impl Game {
             self.preparation_handler();
         }
 
-        while self.game_state == GameState::InProgress {
-            self.in_progress_handler();
+        while self.game_state == GameState::Attack {
+            self.attack_handler();
         }
     }
 
@@ -99,7 +99,7 @@ impl Game {
                     }
                 } else if parsed_input.is_none() && self.get_player(player_num).all_ships_placed() {  // if user is done placing ships
                     if player_num == self.players.len() - 1 {
-                        self.game_state = GameState::InProgress;
+                        self.game_state = GameState::Attack;
                     }
                     self.switch_turn();
                     break;
@@ -144,7 +144,7 @@ impl Game {
         }
     }
 
-    fn in_progress_handler(&mut self) {
+    fn attack_handler(&mut self) {
         let player_num = self.turn.unwrap();
 
         print!("{esc}c", esc = 27 as char);  // clears console
@@ -154,14 +154,14 @@ impl Game {
         self.print_enemy_board(player_num);
         println!("Player {}'s Turn", player_num + 1);
         println!("Where would you like to shoot? Format: <position>");
-        self.in_progress_input_handler();
+        self.attack_input_handler();
     }
 
-    fn in_progress_input_handler(&mut self) {
+    fn attack_input_handler(&mut self) {
         let player_num: usize = self.turn.unwrap();
         loop {
             let input: String = utils::read_input();
-            let parsed_input = self.parse_in_progress_input(input);
+            let parsed_input = self.parse_attack_input(input);
             if parsed_input.is_err() {
                 println!("Invalid input. Example input: 5D");
                 continue;
@@ -183,7 +183,7 @@ impl Game {
         };
     }
 
-    fn parse_in_progress_input(&self, input: String) -> Result<(usize, usize), ()> {
+    fn parse_attack_input(&self, input: String) -> Result<(usize, usize), ()> {
         // Format: <position>
         match self.settings.parse_alphanum_pos(input.as_str()) {
             Ok(pos) => Ok(pos),
