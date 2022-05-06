@@ -3,7 +3,7 @@ const NUM_SHIPS: usize = 5;
 pub struct Ship {
     ship_type: ShipType,
     position: Option<ShipPosition>,
-    health: u8,
+    pub health: u8,
 }
 
 impl Ship {

@@ -12,3 +12,9 @@ pub enum PlaceShipError {
     AlreadyOccupied,
     OutOfBounds,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ShootError {
+    AlreadyTargeted,
+    OutOfBounds,
+}

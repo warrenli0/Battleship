@@ -1,6 +1,6 @@
 use crate::ship::{ Ship, ShipType, ShipPosition };
 use crate::space::{Space};
-use crate::lib::{ PlaceShipError };
+use crate::lib::{ PlaceShipError, ShootError };
 
 pub struct Player {
     board: Vec<Vec<Space>>,
@@ -21,14 +21,6 @@ impl Player {
 
     pub fn get_ships(&self) -> &Vec<Ship> {
         &self.ships
-    }
-
-    pub fn get_space(&self, row: usize, col: usize) -> &Space {
-        &self.board[row][col]
-    }
-
-    pub fn get_space_mut(&mut self, row: usize, col: usize) -> &mut Space {
-        &mut self.board[row][col]
     }
 
     pub fn all_ships_placed(&self) -> bool {
@@ -113,5 +105,24 @@ impl Player {
                 print!(", ");
             }
         }
+    }
+
+    // If targeted space is valid and was not previously targeted, returns true if a ship was hit and false if miss
+    pub fn shoot(&mut self, row: usize, col: usize) -> Result<bool, ShootError> {
+        if row >= self.board.len() || col >= self.board[0].len() {
+            return Err(ShootError::OutOfBounds);
+        }
+
+        let space: &mut Space = &mut self.board[row][col];
+        if space.was_targeted() {
+            return Err(ShootError::AlreadyTargeted);
+        }
+        space.shoot();
+
+        if space.is_occupied() {
+            self.ships.get_mut(space.get_occupant().unwrap()).unwrap().health -= 1;
+            return Ok(true);
+        }
+        Ok(false)
     }
 }

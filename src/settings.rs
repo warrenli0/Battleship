@@ -32,13 +32,13 @@ impl Settings {
     }
 
     pub fn parse_alphanum_pos(&self, pos: &str) -> Result<(usize, usize), &str> {
-        let chars: Vec<char> = pos.chars().collect();
-        if chars.len() < 2 { return Err("Missing digit or letter. Can only parse the pattern: <digits><letter>"); }
+        let chars: Vec<char> = pos.trim().chars().collect();
+        if chars.len() < 2 { return Err("Missing digit or letter1. Can only parse the pattern: <digits><letter>"); }
 
         let first_char: char = *chars.get(0).unwrap();
         let last_char: char = *chars.get(chars.len() - 1).unwrap();
         if !first_char.is_digit(10) || !last_char.is_ascii_alphabetic() {
-            return Err("Missing digit or letter. Can only parse the pattern: <digits><letter>");
+            return Err("Missing digit or letter2. Can only parse the pattern: <digits><letter>");
         }
 
         let mut row: usize = first_char.to_digit(10).unwrap() as usize;

@@ -2,8 +2,10 @@ use crate::player::Player;
 use crate::settings::Settings;
 use crate::ship::{ShipPosition};
 use crate::space::{Space};
-use crate::lib::{ GameState, PlaceShipError };
+use crate::lib::{ GameState, PlaceShipError, ShootError };
 use crate::utils;
+
+use std::{thread, time};
 
 pub struct Game {
     settings: Settings,
@@ -71,18 +73,18 @@ impl Game {
         let player_num: usize = self.turn.unwrap();
 
         print!("{esc}c", esc = 27 as char);  // clears console
-        self.print_board(player_num);
+        self.print_board(player_num, false);
         println!("Player {}'s Turn", player_num + 1);
         print!("Your ships: ");
         self.get_player(player_num).print_ships();
-        if self.get_player(player_num).all_ships_placed() {
-            print!("\nAll of your ships are placed. Type 'ready' if you are done placing ships.");
-        }
         println!("\nWhere would you like to place a ship? Format: <ship number>, <position>, <'h' for horizontal or 'v' for vertical>");
+        if self.get_player(player_num).all_ships_placed() {
+            println!("All of your ships are placed. Type 'ready' if you are done placing ships.");
+        }
         self.preparation_input_handler();
     }
 
-    fn preparation_input_handler(&mut self) {;
+    fn preparation_input_handler(&mut self) {
         let player_num: usize = self.turn.unwrap();
         loop {
             let input: String = utils::read_input();
@@ -92,7 +94,7 @@ impl Game {
                 if parsed_input.is_some() {  // if player wants to place a ship
                     let ship_num: usize = parsed_input.unwrap().0;
                     let ship_pos: ShipPosition = parsed_input.unwrap().1;
-                    if (self.place_ship(player_num, ship_num, ship_pos).is_ok()) {
+                    if self.place_ship(player_num, ship_num, ship_pos).is_ok() {
                         break;
                     }
                 } else if parsed_input.is_none() && self.get_player(player_num).all_ships_placed() {  // if user is done placing ships
@@ -127,7 +129,7 @@ impl Game {
             let ship_num: usize = ship_num.unwrap();
             let orientation: char = orientation.unwrap().to_ascii_lowercase();
             let parsed_pos = self.settings.parse_alphanum_pos(pos_str);
-            if ship_num < self.settings.get_num_ships() && parsed_pos.is_ok() && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
+            if ship_num < self.settings.get_num_ships() && parsed_pos.is_ok() && (orientation == 'h' || orientation == 'v') {
                 let (row, col) = parsed_pos.unwrap();
                 return Ok(Some((ship_num, ShipPosition {row, col, is_horizontal: orientation == 'h'})));
             }
@@ -143,21 +145,54 @@ impl Game {
     }
 
     fn in_progress_handler(&mut self) {
-        todo!();
-        // read input for hits
+        let player_num = self.turn.unwrap();
+
+        print!("{esc}c", esc = 27 as char);  // clears console
+        println!("Your Board");
+        self.print_board(player_num, false);
+        println!("Enemy's Board");
+        self.print_enemy_board(player_num);
+        println!("Player {}'s Turn", player_num + 1);
+        println!("Where would you like to shoot? Format: <position>");
+        self.in_progress_input_handler();
     }
 
-    fn shoot(&mut self, player_num: usize, row: usize, col: usize) -> Result<bool, PlaceShipError> {
-        let mut player: &mut Player = self.get_player_mut(player_num);
-        if row >= player.get_board().len() || row < 0 || col >= player.get_board()[0].len() || col < 0 {
-            return Err(PlaceShipError::OutOfBounds);
+    fn in_progress_input_handler(&mut self) {
+        let player_num: usize = self.turn.unwrap();
+        loop {
+            let input: String = utils::read_input();
+            let parsed_input = self.parse_in_progress_input(input);
+            if parsed_input.is_err() {
+                println!("Invalid input. Example input: 5D");
+                continue;
+            }
+
+            let target_row_col: (usize, usize) = parsed_input.unwrap();
+            let shoot_result = self.shoot_enemy(player_num, target_row_col.0, target_row_col.1);
+            if shoot_result.is_ok() {
+                if !shoot_result.unwrap() {
+                    println!("Your shot missed! Switching turns in 3 seconds...");
+                    self.switch_turn();
+                    thread::sleep(time::Duration::from_secs(3));
+                }
+                break;
+            }
+            if shoot_result.err().unwrap() == ShootError::AlreadyTargeted {
+                println!("You already targeted that space.");
+            }
+        };
+    }
+
+    fn parse_in_progress_input(&self, input: String) -> Result<(usize, usize), ()> {
+        // Format: <position>
+        match self.settings.parse_alphanum_pos(input.as_str()) {
+            Ok(pos) => Ok(pos),
+            Err(err) => Err(())
         }
-        player.get_space_mut(row,col).shoot();
-        if player.get_space(row,col).is_occupied() {
-            return Ok(true);
-        } else {
-            return Ok(false);
-        }
+    }
+
+    fn shoot_enemy(&mut self, player_num: usize, row: usize, col: usize) -> Result<bool, ShootError> {
+        self.get_player_mut(if player_num == 0 { 1 } else { 0 }).shoot(row, col)
     }
 
     fn check_for_winner(&self) -> Option<usize> {
@@ -171,10 +206,10 @@ impl Game {
     pub fn print(&self) {
         println!("========== GAME DETAILS ==========");
         println!("\nThe board of Player 1:");
-        self.print_board(0);
+        self.print_board(0, false);
 
         println!("\nThe board of Player 2:");
-        self.print_board(1);
+        self.print_board(1, false);
 
         println!("\nGame State: {:?}", self.game_state);
         println!("Round: {:?}", self.round);
@@ -192,7 +227,7 @@ impl Game {
         }
     }
 
-    fn print_board(&self, player_num: usize) {
+    fn print_board(&self, player_num: usize, hide_ship_locs: bool) {
         let player: &Player = self.get_player(player_num);
         let board: &Vec<Vec<Space>> = player.get_board();
 
@@ -201,8 +236,14 @@ impl Game {
             for space in board.get(row).unwrap() {
                 match space.get_occupant() {
                     Some(ship_num) => match space.was_targeted() {
-                        true => print!(" X "),  // 💥
-                        false => print!(" {} ", ship_num)
+                        true => {
+                            if hide_ship_locs && player.get_ships().get(ship_num).unwrap().health == 0 {
+                                print!(" {} ", ship_num);
+                            } else {
+                                print!(" X ")
+                            }
+                        },  // 💥
+                        false => if hide_ship_locs { print!(" - ") } else { print!(" {} ", ship_num) }
                     },
                     None => match space.was_targeted() {
                         true => print!(" ~ "),  // 💧
@@ -220,5 +261,9 @@ impl Game {
             col_label = char::from_u32(col_label as u32 + 1).unwrap_or(col_label);
         }
         println!();
+    }
+
+    fn print_enemy_board(&self, player_num: usize) {
+        self.print_board(if player_num == 0 { 1 } else { 0 }, true);
     }
 }
