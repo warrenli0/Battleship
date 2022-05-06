@@ -196,7 +196,7 @@ impl Game {
         // Format: <position>
         match self.settings.parse_alphanum_pos(input.as_str()) {
             Ok(pos) => Ok(pos),
-            Err(err) => Err(())
+            Err(_) => Err(())
         }
     }
 
@@ -266,7 +266,7 @@ impl Game {
 
         print!("   ");
         let mut col_label: char = 'A';
-        for col in 0..self.settings.get_num_cols() {
+        for _col in 0..self.settings.get_num_cols() {
             print!(" {} ", col_label);
             col_label = char::from_u32(col_label as u32 + 1).unwrap_or(col_label);
         }

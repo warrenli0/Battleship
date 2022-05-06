@@ -1,18 +1,14 @@
-use crate::ship::{ShipPosition};
-
 const MAX_NUM_ROWS: usize = 26;  // max number of rows is 26 because we use an alphanumeric positioning system, where the row is represented as a single letter
 pub struct Settings {
-    game_impl: GameImpl,
     num_rows: usize,
     num_cols: usize,
     num_ships: usize,
 }
 
 impl Settings {
-    pub fn new(game_impl: GameImpl, num_rows: usize, num_cols: usize) -> Settings {
+    pub fn new(num_rows: usize, num_cols: usize) -> Settings {
         assert!(num_rows <= MAX_NUM_ROWS);
         Settings {
-            game_impl,
             num_rows,
             num_cols,
             num_ships: 5,  // hard-coded for now
@@ -64,9 +60,4 @@ impl Settings {
 
         Ok((row - 1, col - 65))
     }
-}
-
-pub enum GameImpl {
-    CommandLine,
-    // Graphics,
 }

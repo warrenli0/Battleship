@@ -1,12 +1,11 @@
-use crate::ship::{ Ship, ShipType, ShipPosition };
+use crate::ship::{ Ship, ShipPosition };
 use crate::space::{Space};
 use crate::lib::{ PlaceShipError, ShootError };
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PlayerNumber {
     One,
-    Two,
-    Computer
+    Two
 }
 
 pub struct Player {
@@ -28,14 +27,6 @@ impl Player {
 
     pub fn get_ships(&self) -> &Vec<Ship> {
         &self.ships
-    }
-
-    pub fn get_space(&self, row: usize, col: usize) -> &Space {
-        &self.board[row][col]
-    }
-
-    pub fn get_space_mut(&mut self, row: usize, col: usize) -> &mut Space {
-        &mut self.board[row][col]
     }
 
     pub fn all_ships_placed(&self) -> bool {
@@ -103,7 +94,7 @@ impl Player {
             let mut spaces: Vec<&mut Space> = Vec::with_capacity(size);
             let mut idx: usize = 0;
             for space in self.board[pos.row].iter_mut() {
-                if (idx >= pos.col && idx < pos.col + size) { spaces.push(space); }
+                if idx >= pos.col && idx < pos.col + size { spaces.push(space); }
                 idx += 1;
             }
             return Ok(spaces);

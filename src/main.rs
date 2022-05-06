@@ -7,13 +7,13 @@ mod space;
 mod utils;
 
 use game::Game;
-use settings::{Settings, GameImpl};
+use settings::{Settings};
 
 const NUM_ROWS: usize = 12;
 const NUM_COLS: usize = 11;
 
 fn main() {
-    let settings: Settings = Settings::new(GameImpl::CommandLine, NUM_ROWS, NUM_COLS);
+    let settings: Settings = Settings::new(NUM_ROWS, NUM_COLS);
     let mut game: Game = Game::new(settings);
     game.init();
 }
