@@ -1,5 +1,4 @@
-# 128H-Final
-### Group 22 ###
+# Batteship
 
 Members: Warren Li (warrenl2), Alan Yao (ay15), David Yates (djyates2), Armin Rafieyan (arafi4)
 
